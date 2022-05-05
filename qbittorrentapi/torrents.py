@@ -20,6 +20,7 @@ from qbittorrentapi.decorators import aliased
 from qbittorrentapi.decorators import endpoint_introduced
 from qbittorrentapi.decorators import handle_hashes
 from qbittorrentapi.decorators import login_required
+from qbittorrentapi.decorators import response_bytes
 from qbittorrentapi.decorators import response_json
 from qbittorrentapi.decorators import response_text
 from qbittorrentapi.definitions import APINames
@@ -387,6 +388,10 @@ class TorrentDictionary(Dictionary):
         self._client.torrents_remove_tags(
             torrent_hashes=self._torrent_hash, tags=tags, **kwargs
         )
+
+    def export(self, **kwargs):
+        """Implements :meth:`~TorrentsAPIMixIn.export`"""
+        return self._client.torrents_export(torrent_hash=self._torrent_hash, **kwargs)
 
 
 class TorrentPropertiesDictionary(Dictionary):
@@ -1619,6 +1624,25 @@ class TorrentsAPIMixIn(Request):
                     "This endpoint is available starting in Web API v2.7."
                 ),
             )
+
+    @handle_hashes
+    @endpoint_introduced("2.8.11", "torrents/export")
+    @response_bytes
+    @login_required
+    def torrents_export(self, torrent_hash=None, **kwargs):
+        """
+        Export a .torrent file for the torrent.
+
+        :raises NotFound404Error: torrent not found
+        :raises Conflict409Error: unable to export .torrent file
+
+        :param torrent_hash: hash for torrent
+        :return: bytes .torrent file
+        """
+        data = {"hash": torrent_hash}
+        return self._post(
+            _name=APINames.Torrents, _method="export", data=data, **kwargs
+        )
 
     ##########################################################################
     # MULTIPLE TORRENT ENDPOINTS
