@@ -335,7 +335,7 @@ jobs:
     # Run tests against old qBittorrent release and all Python releases
     #######
     name: "Release Legacy Test ${{ matrix.python-version }} - v${{ matrix.QBT_VER }}"
-    needs: [tests-extended, verify]
+    needs: [tests-smoke, verify]
     runs-on: ubuntu-20.04
     continue-on-error: true
     env:
@@ -608,7 +608,7 @@ jobs:
     # Verify package can be installed on all platforms
     #######
     name: Verify Dev Env
-    needs: package
+    needs: tests-smoke
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
